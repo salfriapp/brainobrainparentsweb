@@ -28,7 +28,7 @@ export default function AuthLayout() {
       </div>
 
       <p className="mt-6 text-xs text-gray-400">
-        &copy; {new Date().getFullYear()} Brainobrain. All rights reserved.
+        &copy; {new Date().getFullYear()} Brainobrain Deutschland UG.All rights reserved.
       </p>
     </div>
   )
