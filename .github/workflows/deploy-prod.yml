@@ -1,0 +1,45 @@
+name: Deploy Parents Web to Production
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: BOB_ENV
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build for Production
+        run: npm run build:production
+
+      - name: Deploy via FTP
+        run: |
+          sudo apt-get install -y lftp
+          lftp -e "
+            set ftp:ssl-allow yes;
+            set ftp:ssl-force yes;
+            set ftp:ssl-protect-data yes;
+            set ssl:verify-certificate no;
+            set net:max-retries 3;
+            set net:timeout 30;
+            mirror --reverse --delete --verbose \
+              ./dist/ /;
+            quit;
+          " -u "${{ secrets.PROD_PARENTS_APP_USERNAME }},${{ secrets.PROD_PARENTS_APP_PASSWORD }}" "${{ secrets.PROD_SERVER }}"
