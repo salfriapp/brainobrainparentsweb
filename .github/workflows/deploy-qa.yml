@@ -32,14 +32,15 @@ jobs:
       - name: Deploy via FTP
         run: |
           sudo apt-get install -y lftp
-          lftp -e "
+          lftp -u "${{ secrets.QA_PARENTS_APP_USERNAME }},${{ secrets.QA_PARENTS_APP_PASSWORD }}" "${{ secrets.QA_SERVER }}" -e "
             set ftp:ssl-allow yes;
             set ftp:ssl-force yes;
             set ftp:ssl-protect-data yes;
             set ssl:verify-certificate no;
+            set ftp:passive-mode yes;
             set net:max-retries 3;
             set net:timeout 30;
             mirror --reverse --delete --verbose \
               ./dist/ /;
             quit;
-          " -u "${{ secrets.QA_PARENTS_APP_USERNAME }},${{ secrets.QA_PARENTS_APP_PASSWORD }}" "${{ secrets.QA_SERVER }}"
+          "
