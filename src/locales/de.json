@@ -1,4 +1,7 @@
 {
+  "app": {
+    "copyright": "© {{year}} Brainobrain Deutschland UG. Alle Rechte vorbehalten."
+  },
   "common": {
     "loading": "Laden...",
     "error": "Etwas ist schiefgelaufen",
@@ -33,7 +36,9 @@
     "resetPasswordTitle": "Neues Passwort festlegen",
     "newPassword": "Neues Passwort",
     "confirmPassword": "Passwort bestätigen",
-    "resetPassword": "Passwort zurücksetzen"
+    "resetPassword": "Passwort zurücksetzen",
+    "loginFailed": "Anmeldung fehlgeschlagen",
+    "invalidCredentials": "E-Mail oder Passwort ist falsch."
   },
   "dashboard": {
     "title": "Willkommen",

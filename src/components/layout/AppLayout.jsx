@@ -82,6 +82,9 @@ export default function AppLayout() {
           <LogOut className="w-5 h-5 flex-shrink-0" />
           {t('nav.logout')}
         </button>
+        <p className="px-3 pt-3 text-[11px] leading-4 text-green-300">
+          {t('app.copyright', { year: new Date().getFullYear() })}
+        </p>
       </div>
     </div>
   )
