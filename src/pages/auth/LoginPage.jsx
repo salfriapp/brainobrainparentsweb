@@ -44,6 +44,12 @@ export default function LoginPage() {
           {errors.password && <p className="text-xs text-bb-red mt-1">{errors.password.message}</p>}
         </div>
 
+        {login.isError && (
+          <p className="text-sm text-red-600">
+            {t(`auth.${login.error?.response?.data?.message}`, { defaultValue: t('auth.loginFailed') })}
+          </p>
+        )}
+
         <button
           type="submit"
           disabled={login.isPending}

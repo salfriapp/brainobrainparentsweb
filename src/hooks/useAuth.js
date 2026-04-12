@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import api from '../lib/api'
+import { encryptLoginCredentials } from '../lib/loginEncryption'
 import useAuthStore from '../store/authStore'
 
 export function useLogin() {
@@ -9,7 +10,14 @@ export function useLogin() {
   const setAuth = useAuthStore((s) => s.setAuth)
 
   return useMutation({
-    mutationFn: (credentials) => api.post('/auth/login', credentials),
+    mutationFn: async (credentials) => {
+      const payload = await encryptLoginCredentials(credentials, async () => {
+        const response = await api.get('/auth/encryption-key')
+        return response.data.data.public_key
+      })
+
+      return api.post('/auth/login', payload)
+    },
     onSuccess: (res) => {
       const { token, user } = res.data.data
       localStorage.setItem('bb_parent_token', token)
