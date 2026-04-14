@@ -7,6 +7,7 @@ import useAuthStore from '../../store/authStore'
 import Card, { CardHeader, CardBody } from '../../components/ui/Card'
 import Badge from '../../components/ui/Badge'
 import { PageLoader } from '../../components/ui/LoadingSpinner'
+import { levelImageUrl, hideOnMissing } from '../../lib/levelImages'
 
 export default function DashboardPage() {
   const { t } = useTranslation()
@@ -65,9 +66,23 @@ export default function DashboardPage() {
             <Card key={child.id}>
               <CardBody>
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-bb-orange-lt flex items-center justify-center flex-shrink-0">
-                    <User className="w-6 h-6 text-bb-orange" />
-                  </div>
+                  {(() => {
+                    console.log("child program: " + child.program_id);
+                    const url = levelImageUrl(child.program_id, child.level_number)
+                    console.log("url: " . url);
+                    return url ? (
+                      <img
+                        src={url}
+                        alt={child.level_name}
+                        onError={hideOnMissing}
+                        className="w-16 h-16 object-contain flex-shrink-0 rounded-md bg-bb-orange-lt p-1"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-bb-orange-lt flex items-center justify-center flex-shrink-0">
+                        <User className="w-6 h-6 text-bb-orange" />
+                      </div>
+                    )
+                  })()}
                   <div className="flex-1 min-w-0">
                     <h3 className="text-sm font-semibold text-gray-900">{child.name}</h3>
                     <div className="mt-2 space-y-1">

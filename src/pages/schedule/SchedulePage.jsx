@@ -6,6 +6,7 @@ import api from '../../lib/api'
 import Card, { CardHeader, CardBody } from '../../components/ui/Card'
 import Badge from '../../components/ui/Badge'
 import { PageLoader } from '../../components/ui/LoadingSpinner'
+import { levelImageUrl, hideOnMissing } from '../../lib/levelImages'
 
 export default function SchedulePage() {
   const { t } = useTranslation()
@@ -68,6 +69,23 @@ export default function SchedulePage() {
           {/* Group Info Card */}
           <Card className="mb-6">
             <CardBody>
+              {(() => {
+                const url = levelImageUrl(activeChild.program_id, activeChild.level_number)
+                return url ? (
+                  <div className="flex items-center gap-4 mb-4 pb-4 border-b border-gray-100">
+                    <img
+                      src={url}
+                      alt={activeChild.level_name}
+                      onError={hideOnMissing}
+                      className="h-20 w-20 object-contain flex-shrink-0"
+                    />
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">{t('schedule.level')}</p>
+                      <p className="text-xl font-bold text-gray-900">{activeChild.level_name || '—'}</p>
+                    </div>
+                  </div>
+                ) : null
+              })()}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="flex items-center gap-2">
                   <CalendarDays className="w-4 h-4 text-gray-400" />
@@ -105,44 +123,56 @@ export default function SchedulePage() {
 
           {/* Sessions List */}
           <div className="space-y-2">
-            {(activeChild.sessions || []).length === 0 ? (
-              <Card>
-                <CardBody>
-                  <p className="text-sm text-gray-400 text-center py-4">{t('schedule.noSessions')}</p>
-                </CardBody>
-              </Card>
-            ) : (
-              (activeChild.sessions || []).map((session) => (
-                <div
-                  key={session.id}
-                  className={`border-l-4 rounded-lg shadow-sm border border-gray-100 ${statusColors[session.status] || 'bg-white border-l-gray-300'}`}
-                >
-                  <div className="px-4 py-3 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">
-                        {session.session_number}
+            {(() => {
+              // Identify the most recently completed session so we can highlight it.
+              const completed = (activeChild.sessions || []).filter((s) => s.status === 'completed')
+              const latestCompletedId = completed.length
+                ? completed.reduce((acc, s) =>
+                    new Date(s.scheduled_date) > new Date(acc.scheduled_date) ? s : acc
+                  ).id
+                : null
+              return (activeChild.sessions || []).length === 0 ? (
+                <Card>
+                  <CardBody>
+                    <p className="text-sm text-gray-400 text-center py-4">{t('schedule.noSessions')}</p>
+                  </CardBody>
+                </Card>
+              ) : (
+                (activeChild.sessions || []).map((session) => {
+                  const isLatestCompleted = session.id === latestCompletedId
+                  return (
+                    <div
+                      key={session.id}
+                      className={`border-l-4 rounded-lg shadow-sm border border-gray-100 ${statusColors[session.status] || 'bg-white border-l-gray-300'} ${isLatestCompleted ? 'ring-2 ring-bb-green/40' : ''}`}
+                    >
+                      <div className="px-4 py-3 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${isLatestCompleted ? 'bg-bb-green text-white' : 'bg-gray-100 text-gray-600'}`}>
+                            {session.session_number}
+                          </div>
+                          <div>
+                            <p className={`text-sm text-gray-900 ${isLatestCompleted ? 'font-bold' : 'font-medium'}`}>
+                              {t('schedule.sessionNo')} {session.session_number}
+                            </p>
+                            <p className="text-xs text-gray-500">{fmtDate(session.scheduled_date)}</p>
+                          </div>
+                        </div>
+                        <Badge status={session.status} label={t(`schedule.${session.status}`)} />
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          {t('schedule.sessionNo')} {session.session_number}
-                        </p>
-                        <p className="text-xs text-gray-500">{fmtDate(session.scheduled_date)}</p>
-                      </div>
-                    </div>
-                    <Badge status={session.status} label={t(`schedule.${session.status}`)} />
-                  </div>
 
-                  {session.notes && (
-                    <div className="px-4 pb-3 border-t border-gray-100 pt-3">
-                      <div className="flex items-start gap-2">
-                        <StickyNote className="w-3.5 h-3.5 text-gray-400 mt-0.5 flex-shrink-0" />
-                        <p className="text-xs text-gray-600 leading-relaxed">{session.notes}</p>
-                      </div>
+                      {session.notes && (
+                        <div className="px-4 pb-3 border-t border-gray-100 pt-3">
+                          <div className="flex items-start gap-2">
+                            <StickyNote className="w-3.5 h-3.5 text-gray-400 mt-0.5 flex-shrink-0" />
+                            <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-wrap">{session.notes}</p>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              ))
-            )}
+                  )
+                })
+              )
+            })()}
           </div>
         </>
       )}

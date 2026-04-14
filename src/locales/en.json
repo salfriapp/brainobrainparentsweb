@@ -76,7 +76,15 @@
     "noRegistration": "No registration forms found",
     "status": "Status",
     "date": "Date",
-    "amount": "Amount"
+    "dueDate": "Due",
+    "amount": "Amount",
+    "notAuthorized": "You are not authorised to view this document.",
+    "downloadFailed": "Failed to open document.",
+    "invoiceStatus": {
+      "due": "Due",
+      "overdue": "Overdue",
+      "paid": "Paid"
+    }
   },
   "schedule": {
     "title": "Class Schedule",
