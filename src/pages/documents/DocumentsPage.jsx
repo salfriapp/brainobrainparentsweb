@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { FileText, Download, Eye, FileCheck, Receipt, MessageSquare, ClipboardList } from 'lucide-react'
+import { FileText, Download, Eye, FileCheck, Euro, MessageSquare, ClipboardList } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 import api from '../../lib/api'
@@ -11,7 +11,7 @@ import EmptyState from '../../components/ui/EmptyState'
 
 const tabs = [
   { key: 'contracts', icon: FileCheck },
-  { key: 'invoices', icon: Receipt },
+  { key: 'invoices', icon: Euro },
   { key: 'feedbackForms', icon: MessageSquare },
   { key: 'registrationForms', icon: ClipboardList },
 ]
@@ -129,34 +129,51 @@ export default function DocumentsPage() {
       {activeTab === 'invoices' && (
         <div className="space-y-3">
           {invoices.length === 0 ? (
-            <Card><CardBody><EmptyState icon={Receipt} title={t('documents.noInvoices')} /></CardBody></Card>
-          ) : invoices.map((inv) => (
-            <Card key={inv.id}>
-              <CardBody>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <Receipt className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm font-semibold text-gray-900">{inv.invoice_number}</span>
-                      <Badge status={inv.status} />
+            <Card><CardBody><EmptyState icon={Euro} title={t('documents.noInvoices')} /></CardBody></Card>
+          ) : invoices.map((inv) => {
+            const totalStr = new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(inv.total || 0))
+            // Parents see "due" instead of "sent" — the raw DB status stays
+            // the same, only the label in the parent portal changes.
+            const displayStatus = inv.status === 'sent' ? 'due' : inv.status
+            const statusLabel = t(`documents.invoiceStatus.${displayStatus}`, { defaultValue: displayStatus })
+            return (
+              <Card key={inv.id}>
+                <CardBody>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <Euro className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm font-semibold text-gray-900">{inv.invoice_number}</span>
+                        <Badge status={inv.status} label={statusLabel} />
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        {inv.level_name}
+                        {inv.installment_total > 1 && (
+                          <span> · {inv.installment_number}/{inv.installment_total}</span>
+                        )}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        {t('documents.date')}: {fmtDate(inv.issue_date)}
+                        {inv.due_date && <span> · {t('documents.dueDate')}: {fmtDate(inv.due_date)}</span>}
+                      </p>
                     </div>
-                    <p className="text-xs text-gray-500">
-                      {t('documents.amount')}: {inv.amount} &euro; &middot; {t('documents.date')}: {fmtDate(inv.date)}
-                    </p>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="text-base font-bold text-gray-900">{totalStr} €</span>
+                      {inv.pdf_url && (
+                        <button
+                          onClick={() => handleDownload(inv.pdf_url)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-bb-blue-lt text-bb-blue rounded-lg text-xs font-medium hover:bg-blue-100 transition-colors"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          PDF
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  {inv.pdf_url && (
-                    <button
-                      onClick={() => handleDownload(inv.pdf_url)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-bb-blue-lt text-bb-blue rounded-lg text-xs font-medium hover:bg-blue-100 transition-colors"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      PDF
-                    </button>
-                  )}
-                </div>
-              </CardBody>
-            </Card>
-          ))}
+                </CardBody>
+              </Card>
+            )
+          })}
         </div>
       )}
 

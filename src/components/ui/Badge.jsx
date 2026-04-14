@@ -6,6 +6,7 @@ const statusStyles = {
   signed: 'bg-green-100 text-green-700',
   draft: 'bg-gray-100 text-gray-600',
   sent: 'bg-amber-100 text-amber-700',
+  overdue: 'bg-red-100 text-red-700',
   pending: 'bg-amber-100 text-amber-700',
   paid: 'bg-green-100 text-green-700',
   partial: 'bg-orange-100 text-orange-700',

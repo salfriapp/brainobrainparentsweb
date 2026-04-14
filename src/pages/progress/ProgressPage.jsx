@@ -6,6 +6,7 @@ import api from '../../lib/api'
 import Card, { CardHeader, CardBody } from '../../components/ui/Card'
 import { PageLoader } from '../../components/ui/LoadingSpinner'
 import ProgressJourney from '../../components/progress/ProgressJourney'
+import { levelImageUrl, hideOnMissing } from '../../lib/levelImages'
 
 export default function ProgressPage() {
   const { t } = useTranslation()
@@ -113,6 +114,59 @@ export default function ProgressPage() {
               </CardBody>
             </Card>
           </div>
+
+          {/* Current level hero image + thumbnail strip */}
+          {activeChild.program_id && (
+            <Card className="mb-6">
+              <CardBody>
+                {(() => {
+                  const currentUrl = levelImageUrl(activeChild.program_id, activeChild.current_level_number)
+                  return currentUrl ? (
+                    <div className="flex items-center justify-center mb-4">
+                      <img
+                        src={currentUrl}
+                        alt={activeChild.current_level_name}
+                        onError={hideOnMissing}
+                        className="max-h-64 w-auto object-contain rounded-lg"
+                      />
+                    </div>
+                  ) : null
+                })()}
+
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                  {(activeChild.levels || []).map((lvl) => {
+                    const thumb = levelImageUrl(activeChild.program_id, lvl.level_number)
+                    if (!thumb) return null
+                    const isCurrent = lvl.level_number === activeChild.current_level_number
+                    const isPast    = lvl.level_number <  activeChild.current_level_number
+                    return (
+                      <div
+                        key={lvl.id}
+                        title={lvl.level_name}
+                        className={`flex-shrink-0 rounded-md p-1 border-2 transition-all ${
+                          isCurrent
+                            ? 'border-bb-orange shadow-md scale-105'
+                            : isPast
+                              ? 'border-bb-green opacity-70'
+                              : 'border-gray-200 opacity-50 grayscale'
+                        }`}
+                      >
+                        <img
+                          src={thumb}
+                          alt={lvl.level_name}
+                          onError={hideOnMissing}
+                          className="h-16 w-16 object-contain"
+                        />
+                        <p className="text-[10px] text-center text-gray-600 mt-1">
+                          {lvl.level_name || `Level ${lvl.level_number}`}
+                        </p>
+                      </div>
+                    )
+                  })}
+                </div>
+              </CardBody>
+            </Card>
+          )}
 
           {/* Visual Progress Journey */}
           <Card>

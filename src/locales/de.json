@@ -76,9 +76,15 @@
     "noRegistration": "Keine Anmeldeformulare gefunden",
     "status": "Status",
     "date": "Datum",
+    "dueDate": "Fällig",
     "amount": "Betrag",
     "notAuthorized": "Sie sind nicht berechtigt, dieses Dokument einzusehen.",
-    "downloadFailed": "Dokument konnte nicht geöffnet werden."
+    "downloadFailed": "Dokument konnte nicht geöffnet werden.",
+    "invoiceStatus": {
+      "due": "Fällig",
+      "overdue": "Überfällig",
+      "paid": "Bezahlt"
+    }
   },
   "schedule": {
     "title": "Stundenplan",

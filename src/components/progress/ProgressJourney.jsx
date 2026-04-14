@@ -42,29 +42,16 @@ function StepIcon({ index, completed, current }) {
 }
 
 // Level stop milestone marker
-function StopMarker({ levelNumber, levelName, completed, current, programType, totalStops }) {
+function StopMarker({ levelNumber, levelName, completed, current }) {
   const opacity = completed || current ? 1 : 0.3
   const borderColor = completed ? 'border-bb-green' : current ? 'border-bb-orange' : 'border-gray-300'
   const bgColor = completed ? 'bg-bb-green-lt' : current ? 'bg-bb-orange-lt' : 'bg-gray-100'
   const textColor = completed ? 'text-bb-green' : current ? 'text-bb-orange' : 'text-gray-400'
 
-  // Calculate age label based on program type and level position
-  const getAgeLabel = () => {
-    if (programType === 'junior') {
-      // LBOB: newborn (0) to 6 years, 8 stops
-      const age = Math.round((levelNumber / totalStops) * 6)
-      return age === 0 ? '👶' : `${age}y`
-    } else {
-      // BOB: 6 to 18 years, 10 stops
-      const age = 6 + Math.round((levelNumber / totalStops) * 12)
-      return `${age}y`
-    }
-  }
-
   return (
     <div className="flex flex-col items-center" style={{ opacity }}>
       <div className={`w-14 h-14 rounded-full border-3 ${borderColor} ${bgColor} flex items-center justify-center transition-all`}>
-        <span className="text-lg">{getAgeLabel()}</span>
+        <span className={`text-xl font-bold ${textColor}`}>{levelNumber}</span>
       </div>
       <div className={`mt-1.5 text-center ${textColor}`}>
         <p className="text-[10px] font-bold leading-tight">{levelName || `L${levelNumber}`}</p>
@@ -98,8 +85,6 @@ export default function ProgressJourney({ programType, levels, currentLevelNumbe
                   levelName={level.level_name}
                   completed={isCompleted}
                   current={isCurrent}
-                  programType={programType}
-                  totalStops={totalStops}
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-1.5">
