@@ -76,7 +76,9 @@
     "noRegistration": "Keine Anmeldeformulare gefunden",
     "status": "Status",
     "date": "Datum",
-    "amount": "Betrag"
+    "amount": "Betrag",
+    "notAuthorized": "Sie sind nicht berechtigt, dieses Dokument einzusehen.",
+    "downloadFailed": "Dokument konnte nicht geöffnet werden."
   },
   "schedule": {
     "title": "Stundenplan",

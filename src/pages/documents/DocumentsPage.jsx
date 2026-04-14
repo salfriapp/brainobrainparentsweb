@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { FileText, Download, Eye, FileCheck, Receipt, MessageSquare, ClipboardList } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import toast from 'react-hot-toast'
 import api from '../../lib/api'
 import Card, { CardHeader, CardBody } from '../../components/ui/Card'
 import Badge from '../../components/ui/Badge'
@@ -34,8 +35,31 @@ export default function DocumentsPage() {
 
   const fmtDate = (d) => d ? new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'
 
-  const handleDownload = (url) => {
-    window.open(url, '_blank')
+  const handleDownload = async (url) => {
+    if (!url) return
+
+    // Proxy URLs require the Bearer token — we must fetch them via axios
+    // (so the request interceptor attaches Authorization) and open the blob.
+    // Raw FTP/static URLs can still be opened directly in a new tab.
+    const isProxyUrl = /\/api\/v1\/(contracts|invoices)\//.test(url)
+
+    if (!isProxyUrl) {
+      window.open(url, '_blank', 'noopener,noreferrer')
+      return
+    }
+
+    try {
+      // axios accepts a full absolute URL here and bypasses baseURL.
+      const response = await api.get(url, { responseType: 'blob' })
+      const objectUrl = URL.createObjectURL(response.data)
+      window.open(objectUrl, '_blank', 'noopener,noreferrer')
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000)
+    } catch (err) {
+      const msg = err.response?.data?.message
+        || (err.response?.status === 403 ? t('documents.notAuthorized') : null)
+        || t('documents.downloadFailed')
+      toast.error(msg)
+    }
   }
 
   return (

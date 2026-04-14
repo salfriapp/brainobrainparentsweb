@@ -76,7 +76,9 @@
     "noRegistration": "No registration forms found",
     "status": "Status",
     "date": "Date",
-    "amount": "Amount"
+    "amount": "Amount",
+    "notAuthorized": "You are not authorised to view this document.",
+    "downloadFailed": "Failed to open document."
   },
   "schedule": {
     "title": "Class Schedule",
