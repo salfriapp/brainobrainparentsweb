@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { CalendarDays, TrendingUp, MessageCircle, FileText, Clock, BookOpen, User } from 'lucide-react'
+import { CalendarDays, TrendingUp, MessageCircle, FileText, Clock, BookOpen, User, CheckCircle, AlertCircle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import toast from 'react-hot-toast'
 import api from '../../lib/api'
 import useAuthStore from '../../store/authStore'
 import Card, { CardHeader, CardBody } from '../../components/ui/Card'
@@ -24,8 +25,75 @@ export default function DashboardPage() {
   const children = dashboard.children || []
   const recentMessages = dashboard.recent_messages || []
   const nextSessions = dashboard.next_sessions || []
+  const invoiceDue = dashboard.invoice_due || null
 
   const fmtDate = (d) => d ? new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'
+  const fmtAmount = (n) => `€ ${Number(n || 0).toFixed(2)}`
+
+  const openInvoicePdf = async (url) => {
+    if (!url) return
+    try {
+      const response = await api.get(url, { responseType: 'blob' })
+      const objectUrl = URL.createObjectURL(response.data)
+      window.open(objectUrl, '_blank', 'noopener,noreferrer')
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000)
+    } catch {
+      toast.error(t('dashboard.invoicePdfFailed'))
+    }
+  }
+
+  const invoiceWidget = invoiceDue ? (
+    <Card className={`border-l-4 ${invoiceDue.is_overdue ? 'border-l-red-500' : 'border-l-amber-500'}`}>
+      <CardBody>
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${invoiceDue.is_overdue ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'}`}>
+              <AlertCircle className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-gray-900">
+                {invoiceDue.is_overdue ? t('dashboard.invoiceOverdueTitle') : t('dashboard.invoiceUpcomingTitle')}
+              </p>
+              <p className="text-xs text-gray-500 mt-0.5 truncate">
+                {invoiceDue.invoice_number} &middot; {invoiceDue.level_name}
+              </p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {t('dashboard.dueOn')}: {fmtDate(invoiceDue.due_date)}
+              </p>
+            </div>
+          </div>
+          <div className="text-right flex-shrink-0">
+            <p className={`text-lg font-bold ${invoiceDue.is_overdue ? 'text-red-600' : 'text-gray-900'}`}>
+              {fmtAmount(invoiceDue.balance)}
+            </p>
+            {invoiceDue.pdf_url && (
+              <button
+                type="button"
+                onClick={() => openInvoicePdf(invoiceDue.pdf_url)}
+                className="text-xs text-bb-blue hover:text-bb-blue-dark font-medium"
+              >
+                {t('dashboard.viewInvoice')}
+              </button>
+            )}
+          </div>
+        </div>
+      </CardBody>
+    </Card>
+  ) : (
+    <Card className="border-l-4 border-l-green-500">
+      <CardBody>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full flex items-center justify-center bg-green-50 text-green-600 flex-shrink-0">
+            <CheckCircle className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-gray-900">{t('dashboard.allPaidUp')}</p>
+            <p className="text-xs text-gray-500 mt-0.5">{t('dashboard.allPaidUpSub')}</p>
+          </div>
+        </div>
+      </CardBody>
+    </Card>
+  )
 
   return (
     <div className="p-6">
@@ -58,18 +126,25 @@ export default function DashboardPage() {
         ))}
       </div>
 
+      {/* Invoice status widget — rendered full-width when the children grid
+          has 0 or >1 cards, and inside the grid (row 1, col 2) when there's
+          exactly one child so the second column isn't left empty. */}
+      {invoiceWidget && children.length !== 1 && (
+        <div className="mb-6">{invoiceWidget}</div>
+      )}
+
       {/* Children Overview */}
       <div className="mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-3">{t('dashboard.childOverview')}</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-3">
+          {children.length === 1 ? t('dashboard.yourChild') : t('dashboard.yourChildren')}
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {children.map((child) => (
             <Card key={child.id}>
               <CardBody>
                 <div className="flex items-start gap-4">
                   {(() => {
-                    console.log("child program: " + child.program_id);
                     const url = levelImageUrl(child.program_id, child.level_number)
-                    console.log("url: " . url);
                     return url ? (
                       <img
                         src={url}
@@ -117,6 +192,7 @@ export default function DashboardPage() {
               </CardBody>
             </Card>
           ))}
+          {children.length === 1 && invoiceWidget}
           {children.length === 0 && (
             <p className="text-sm text-gray-400 col-span-2">{t('common.noData')}</p>
           )}
