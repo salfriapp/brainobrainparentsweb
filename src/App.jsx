@@ -8,6 +8,7 @@ import LoginPage from './pages/auth/LoginPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import ResetPasswordPage from './pages/auth/ResetPasswordPage'
 import ActivatePage from './pages/auth/ActivatePage'
+import ImpersonatePage from './pages/auth/ImpersonatePage'
 import DashboardPage from './pages/dashboard/DashboardPage'
 import DocumentsPage from './pages/documents/DocumentsPage'
 import SchedulePage from './pages/schedule/SchedulePage'
@@ -29,6 +30,7 @@ export default function App() {
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/activate/:token" element={<ActivatePage />} />
+            <Route path="/auth/impersonate" element={<ImpersonatePage />} />
           </Route>
 
           {/* Protected parent routes */}
