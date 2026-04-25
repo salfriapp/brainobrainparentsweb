@@ -1,12 +1,20 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { CalendarDays, Clock, MapPin, User, BookOpen, StickyNote } from 'lucide-react'
+import { CalendarDays, Clock, MapPin, User, BookOpen, StickyNote, UserCheck, CalendarPlus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import api from '../../lib/api'
 import Card, { CardHeader, CardBody } from '../../components/ui/Card'
 import Badge from '../../components/ui/Badge'
 import { PageLoader } from '../../components/ui/LoadingSpinner'
 import { levelImageUrl, hideOnMissing } from '../../lib/levelImages'
+
+const ATTENDANCE_PILL = {
+  present:  'bg-green-100 text-green-700',
+  absent:   'bg-red-100 text-red-700',
+  late:     'bg-amber-100 text-amber-700',
+  excused:  'bg-blue-100 text-blue-700',
+  made_up:  'bg-purple-100 text-purple-700',
+}
 
 export default function SchedulePage() {
   const { t } = useTranslation()
@@ -157,15 +165,52 @@ export default function SchedulePage() {
                             <p className="text-xs text-gray-500">{fmtDate(session.scheduled_date)}</p>
                           </div>
                         </div>
-                        <Badge status={session.status} label={t(`schedule.${session.status}`)} />
+                        <div className="flex items-center gap-2">
+                          {session.attendance && (
+                            <span className={`px-2 py-0.5 rounded-full text-[11px] font-medium ${ATTENDANCE_PILL[session.attendance.status] || 'bg-gray-100 text-gray-600'}`}>
+                              {t(`schedule.attendance.${session.attendance.status}`)}
+                            </span>
+                          )}
+                          <Badge status={session.status} label={t(`schedule.${session.status}`)} />
+                        </div>
                       </div>
 
-                      {session.notes && (
-                        <div className="px-4 pb-3 border-t border-gray-100 pt-3">
-                          <div className="flex items-start gap-2">
-                            <StickyNote className="w-3.5 h-3.5 text-gray-400 mt-0.5 flex-shrink-0" />
-                            <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-wrap">{session.notes}</p>
-                          </div>
+                      {(session.notes || session.attendance?.notes || session.backup) && (
+                        <div className="px-4 pb-3 border-t border-gray-100 pt-3 space-y-2">
+                          {session.notes && (
+                            <div className="flex items-start gap-2">
+                              <StickyNote className="w-3.5 h-3.5 text-gray-400 mt-0.5 flex-shrink-0" />
+                              <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-wrap">{session.notes}</p>
+                            </div>
+                          )}
+                          {session.attendance?.notes && (
+                            <div className="flex items-start gap-2">
+                              <UserCheck className="w-3.5 h-3.5 text-bb-blue mt-0.5 flex-shrink-0" />
+                              <div>
+                                <p className="text-[11px] font-semibold text-bb-blue uppercase tracking-wide">{t('schedule.instructorNote')}</p>
+                                <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap">{session.attendance.notes}</p>
+                              </div>
+                            </div>
+                          )}
+                          {session.backup && (
+                            <div className="flex items-start gap-2">
+                              <CalendarPlus className="w-3.5 h-3.5 text-purple-500 mt-0.5 flex-shrink-0" />
+                              <div>
+                                <p className="text-xs text-gray-700">
+                                  {session.backup.status === 'completed'
+                                    ? t('schedule.backup.completed')
+                                    : session.backup.status === 'cancelled'
+                                      ? t('schedule.backup.cancelled')
+                                      : session.backup.scheduled_date
+                                        ? t('schedule.backup.scheduledOn', { date: fmtDate(session.backup.scheduled_date) })
+                                        : t('schedule.backup.toBeScheduled')}
+                                </p>
+                                {session.backup.notes && (
+                                  <p className="text-xs text-gray-500 leading-relaxed whitespace-pre-wrap mt-0.5">{session.backup.notes}</p>
+                                )}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>

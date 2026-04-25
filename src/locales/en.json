@@ -63,6 +63,10 @@
     "instructor": "Instructor",
     "completedClasses": "Completed Classes",
     "upcomingClasses": "Upcoming Classes",
+    "backupClass": "Backup class",
+    "recentSessionNotes": "Recent Session Notes",
+    "noSessionNotes": "No session notes yet",
+    "studentNoteFromInstructor": "From your instructor",
     "recentMessages": "Recent Messages",
     "noMessages": "No messages yet",
     "quickActions": "Quick Actions",
@@ -114,7 +118,23 @@
     "scheduled": "Scheduled",
     "cancelled": "Cancelled",
     "noSessions": "No sessions scheduled yet",
-    "selectChild": "Select Child"
+    "selectChild": "Select Child",
+    "instructorNote": "Instructor's note",
+    "attendance": {
+      "label": "Attendance",
+      "present": "Present",
+      "absent": "Absent",
+      "late": "Late",
+      "excused": "Excused",
+      "made_up": "Made up via backup class"
+    },
+    "backup": {
+      "scheduled": "Backup class scheduled",
+      "scheduledOn": "Backup class on {{date}}",
+      "toBeScheduled": "Backup class — date to be scheduled",
+      "completed": "Backup class completed",
+      "cancelled": "Backup class cancelled"
+    }
   },
   "messages": {
     "title": "Messages",

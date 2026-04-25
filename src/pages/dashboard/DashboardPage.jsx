@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { CalendarDays, TrendingUp, MessageCircle, FileText, Clock, BookOpen, User, CheckCircle, AlertCircle } from 'lucide-react'
+import { CalendarDays, TrendingUp, MessageCircle, FileText, Clock, BookOpen, User, CheckCircle, AlertCircle, CalendarPlus, StickyNote, UserCheck } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 import api from '../../lib/api'
@@ -25,6 +25,7 @@ export default function DashboardPage() {
   const children = dashboard.children || []
   const recentMessages = dashboard.recent_messages || []
   const nextSessions = dashboard.next_sessions || []
+  const recentSessionNotes = dashboard.recent_session_notes || []
   const invoiceDue = dashboard.invoice_due || null
 
   const fmtDate = (d) => d ? new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'
@@ -199,9 +200,49 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Upcoming Classes & Recent Messages side by side */}
+      {/* Row: left column stacks Recent Session Notes (only if the latest completed
+          session has a note) + Upcoming Classes; right column is Recent Messages */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Upcoming Classes */}
+        <div className="space-y-6">
+        {/* Recent Session Notes — hidden when the latest session has no parent-visible note */}
+        {recentSessionNotes.length > 0 && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <StickyNote className="w-4 h-4 text-gray-400" />
+                <h2 className="text-sm font-semibold text-gray-900">{t('dashboard.recentSessionNotes')}</h2>
+              </div>
+            </CardHeader>
+            <CardBody className="p-0">
+              <div className="divide-y divide-gray-50">
+                {recentSessionNotes.map((n) => (
+                  <div key={n.id} className="px-5 py-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-sm font-medium text-gray-900">
+                        {t('schedule.sessionNo')} {n.session_number}
+                      </p>
+                      <span className="text-xs text-gray-400">{fmtDate(n.scheduled_date)}</span>
+                    </div>
+                    {n.session_notes && (
+                      <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-wrap">{n.session_notes}</p>
+                    )}
+                    {n.student_note && (
+                      <div className="mt-2 flex items-start gap-2">
+                        <UserCheck className="w-3.5 h-3.5 text-bb-blue mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="text-[11px] font-semibold text-bb-blue uppercase tracking-wide">{t('dashboard.studentNoteFromInstructor')}</p>
+                          <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap">{n.student_note}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardBody>
+          </Card>
+        )}
+
+        {/* Upcoming Classes (next 3, mixing regular + backup classes) */}
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -216,13 +257,24 @@ export default function DashboardPage() {
               <div className="divide-y divide-gray-50">
                 {nextSessions.map((s) => (
                   <div key={s.id} className="px-5 py-3 flex items-center justify-between">
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-sm font-medium text-gray-900">{s.student_name}</p>
-                      <p className="text-xs text-gray-500">{s.group_name} &middot; {t('schedule.sessionNo')} {s.session_number}</p>
+                      <p className="text-xs text-gray-500 flex items-center gap-1.5">
+                        {s.kind === 'backup' ? (
+                          <>
+                            <CalendarPlus className="w-3 h-3 text-purple-500" />
+                            <span>{t('dashboard.backupClass')}{s.session_number ? ` · ${t('schedule.sessionNo')} ${s.session_number}` : ''}</span>
+                          </>
+                        ) : (
+                          <>{s.group_name} &middot; {t('schedule.sessionNo')} {s.session_number}</>
+                        )}
+                      </p>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right flex-shrink-0">
                       <p className="text-sm font-medium text-gray-700">{fmtDate(s.scheduled_date)}</p>
-                      <Badge status={s.status} />
+                      {s.kind === 'backup' && s.start_time && (
+                        <p className="text-[11px] text-gray-400">{s.start_time}{s.end_time ? `–${s.end_time}` : ''}</p>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -230,8 +282,9 @@ export default function DashboardPage() {
             )}
           </CardBody>
         </Card>
+        </div>
 
-        {/* Recent Messages */}
+        {/* Right column: Recent Messages */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
