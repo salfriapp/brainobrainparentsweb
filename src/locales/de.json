@@ -63,6 +63,10 @@
     "instructor": "Lehrer",
     "completedClasses": "Abgeschlossene Stunden",
     "upcomingClasses": "Kommende Stunden",
+    "backupClass": "Nachholstunde",
+    "recentSessionNotes": "Notizen zu den letzten Stunden",
+    "noSessionNotes": "Noch keine Notizen vorhanden",
+    "studentNoteFromInstructor": "Von Ihrem Lehrer",
     "recentMessages": "Letzte Nachrichten",
     "noMessages": "Noch keine Nachrichten",
     "quickActions": "Schnellaktionen",
@@ -114,7 +118,23 @@
     "scheduled": "Geplant",
     "cancelled": "Abgesagt",
     "noSessions": "Noch keine Sitzungen geplant",
-    "selectChild": "Kind auswählen"
+    "selectChild": "Kind auswählen",
+    "instructorNote": "Notiz vom Lehrer",
+    "attendance": {
+      "label": "Anwesenheit",
+      "present": "Anwesend",
+      "absent": "Abwesend",
+      "late": "Verspätet",
+      "excused": "Entschuldigt",
+      "made_up": "Per Nachholstunde nachgeholt"
+    },
+    "backup": {
+      "scheduled": "Nachholstunde geplant",
+      "scheduledOn": "Nachholstunde am {{date}}",
+      "toBeScheduled": "Nachholstunde — Datum noch zu planen",
+      "completed": "Nachholstunde abgeschlossen",
+      "cancelled": "Nachholstunde abgesagt"
+    }
   },
   "messages": {
     "title": "Nachrichten",
